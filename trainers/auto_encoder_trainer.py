@@ -64,11 +64,11 @@ class AutoencoderTrainer(AbstractTrainer):
             enc_1 = self.model.encoder(input_1[None, :])
             enc_2 = self.model.encoder(input_2[None, :])
 
-            out_0 = self.model.decoder(enc_1)
-            out_25 = self.model.decoder(.75*enc_1 + .25*enc_2)
-            out_50 = self.model.decoder(.5*enc_1 + .5*enc_2)
-            out_75 = self.model.decoder(.25*enc_1 + .75*enc_2)
-            out_100 = self.model.decoder(enc_2)
+            out_0 = self.model.decoder(enc_1)[0,0]
+            out_25 = self.model.decoder(.75*enc_1 + .25*enc_2)[0,0]
+            out_50 = self.model.decoder(.5*enc_1 + .5*enc_2)[0,0]
+            out_75 = self.model.decoder(.25*enc_1 + .75*enc_2)[0,0]
+            out_100 = self.model.decoder(enc_2)[0,0]
         
         ax_0.imshow(out_0.numpy())
         ax_25.imshow(out_25.numpy())
@@ -78,7 +78,9 @@ class AutoencoderTrainer(AbstractTrainer):
 
         fig.savefig(self.save_dest / ".perf_expl.png")
         
-
+    def save_state(self):
+        super().save_state()
+        self.save_transfo_fig()
 
 
 
