@@ -50,7 +50,7 @@ class AutoencoderTrainer(AbstractTrainer):
                 self.loss_record.append(loss.item())
             
             print(f"Finished epoch {e} with loss={loss.item(): .5f}")
-            self.save_state()
+            self.save_state(save_gif=(e%3 == 2))
         
     def save_transfo_fig(self):
 
@@ -104,10 +104,11 @@ class AutoencoderTrainer(AbstractTrainer):
             fig.savefig(self.save_dest / ".perf_expl.png")
             plt.close(fig)
             
-    def save_state(self):
+    def save_state(self, save_gif=True):
         super().save_state()
         self.save_transfo_fig()
-        self.save_transfo_gifs()
+        if save_gif:
+            self.save_transfo_gifs()
 
     def save_transfo_gifs(self):
 
@@ -141,6 +142,10 @@ class AutoencoderTrainer(AbstractTrainer):
 
             imgs_names = []
 
+            with torch.no_grad():
+                enc_1 = self.model.encoder(input_1[None, :])
+                enc_2 = self.model.encoder(input_2[None, :])
+
             for i in range(101):
 
                 p = i/100
@@ -150,8 +155,6 @@ class AutoencoderTrainer(AbstractTrainer):
                 input_1 = nums[source]
                 input_2 = nums[dest]
                 with torch.no_grad():
-                    enc_1 = self.model.encoder(input_1[None, :])
-                    enc_2 = self.model.encoder(input_2[None, :])
                     out = self.model.decoder(p*enc_1 + (1-p)*enc_2)[0,0]
                 
                 ax.imshow(out.numpy())
@@ -172,7 +175,3 @@ class AutoencoderTrainer(AbstractTrainer):
                 duration=300, loop=0)
             
             tempdir.cleanup()
-
-                
-
-
