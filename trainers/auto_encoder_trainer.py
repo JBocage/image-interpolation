@@ -1,3 +1,8 @@
+import pathlib
+from tempfile import TemporaryDirectory
+from typing import List
+
+from PIL import Image
 from models.auto_encoder import AutoEncoder
 from utils import PackagePaths
 from .abstract_trainer import AbstractTrainer
@@ -97,11 +102,77 @@ class AutoencoderTrainer(AbstractTrainer):
             ax_100.set_title(str(lbl2))
 
             fig.savefig(self.save_dest / ".perf_expl.png")
+            plt.close(fig)
             
     def save_state(self):
         super().save_state()
         self.save_transfo_fig()
+        self.save_transfo_gifs()
 
+    def save_transfo_gifs(self):
 
+        transfo_to_observe = [
+            [0, 8],
+            [5, 7],
+            [5, 2],
+            [6, 9]
+        ]
+
+        ds = datasets.MNIST(
+            root = PackagePaths.DATA,
+            train = True,
+            download=True,
+            transform=lambda x: torch.tensor(np.array(x)/255).float()[None, :]
+        )
+
+        nums = {
+            i: None for i in range(10)
+        }
+        idx = 0
+        while None in nums.values():
+            img, lbl = ds[idx]
+            nums[lbl] = img
+            idx += 1
+
+        for source, dest in transfo_to_observe:
+
+            tempdir = TemporaryDirectory()
+            path_to_tempdir = pathlib.Path(tempdir)
+
+            imgs_names = []
+
+            for i in range(101):
+
+                p = i/100
+
+                fig, ax = plt.subplots()
+
+                input_1 = nums[source]
+                input_2 = nums[dest]
+                with torch.no_grad():
+                    enc_1 = self.model.encoder(input_1[None, :])
+                    enc_2 = self.model.encoder(input_2[None, :])
+                    out = self.model.decoder(p*enc_1 + (1-p)*enc_2)[0,0]
+                
+                ax.imshow(out.numpy())
+                ax.set_title(f'{source} to {dest}')
+
+                fname = f"tmp_{i}.png"
+                fig.savefig(path_to_tempdir / fname)
+                imgs_names.append(fname)
+                plt.close(fig)
+            
+            imgs: List[Image.Image] = []
+            for fname in imgs_names:
+                imgs.append(Image.open(path_to_tempdir / fname))
+            
+            imgs[0].save(self.save_dest / f'{source}_to_{dest}.gif', format='GIF',
+                append_images=imgs[1:],
+                save_all=True,
+                duration=300, loop=0)
+            
+            tempdir.cleanup()
+
+                
 
 
