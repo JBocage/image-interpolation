@@ -4,7 +4,7 @@ from abc import abstractmethod
 import torch
 import torch.nn as nn
 
-from ..utils import PackagePaths
+from utils import PackagePaths
 
 
 class AbstractModel(nn.Module):

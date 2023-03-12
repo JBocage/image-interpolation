@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import joblib
 import matplotlib.pyplot as plt
 
-from ..models import AbstractModel
+from models import AbstractModel
 
 
 class AbstractTrainer(ABC):
