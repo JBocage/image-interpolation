@@ -137,7 +137,7 @@ class AutoencoderTrainer(AbstractTrainer):
         for source, dest in transfo_to_observe:
 
             tempdir = TemporaryDirectory()
-            path_to_tempdir = pathlib.Path(tempdir)
+            path_to_tempdir = pathlib.Path(tempdir.name)
 
             imgs_names = []
 
