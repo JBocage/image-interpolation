@@ -11,7 +11,7 @@ class AbstractModel(nn.Module):
     """Abstract class for models"""
 
     # Global Variable: No need to overwrite
-    CHECKPOINT_DIR = PackagePaths.MODELS / "layout_model_chkpt"
+    CHECKPOINT_DIR = PackagePaths.MODELS / "autoencoders"
 
     def __init__(self):
         super(AbstractModel, self).__init__()
