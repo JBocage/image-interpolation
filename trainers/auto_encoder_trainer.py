@@ -26,7 +26,7 @@ class AutoencoderTrainer(AbstractTrainer):
             root = PackagePaths.DATA,
             train = True,
             download=True,
-            transform=lambda x: torch.tensor(np.array(x)/255)[None, :]
+            transform=lambda x: torch.tensor(np.array(x)/255).float()[None, :]
         )
 
         dataloader = DataLoader(dataset=dataset, batch_size=batch_size)
@@ -52,7 +52,7 @@ class AutoencoderTrainer(AbstractTrainer):
             root = PackagePaths.DATA,
             train = True,
             download=True,
-            transform=lambda x: torch.tensor(np.array(x)/255)[None, :]
+            transform=lambda x: torch.tensor(np.array(x)/255).float()[None, :]
         )
 
         input_1, lbl_1 = ds[0]
