@@ -5,7 +5,7 @@ import torch.nn as nn
 
 class Encoder(AbstractModel):
     """Used to encode an MNIST image"""
-    
+
     def __init__(self):
         super().__init__()
 
@@ -18,28 +18,23 @@ class Encoder(AbstractModel):
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
         self.conv5 = nn.Conv2d(in_channels=64, out_channels=16, kernel_size=1)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # 1, 28, 28
-        print(x.shape)        
-        x = self.conv1(x)
-        x = self.maxpool(x)
-        x = self.relu(x)
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        # 1, 28, 28      
+        z = self.conv1(z)
+        z = self.maxpool(z)
+        z = self.relu(z)
         # 16, 14, 14
-        print(x.shape)
-        x = self.conv2(x)
-        x = self.maxpool(x)
-        x = self.relu(x)
+        z = self.conv2(z)
+        z = self.maxpool(z)
+        z = self.relu(z)
         # 32, 7, 7
-        print(x.shape)
-        x = self.conv3(x)
-        x = self.relu(x)
+        z = self.conv3(z)
+        z = self.relu(z)
         # 64, 3, 3
-        print(x.shape)
-        x = self.conv4(x)
-        x = self.relu(x)
+        z = self.conv4(z)
+        z = self.relu(z)
         # 64, 1, 1
-        print(x.shape)
-        x = self.conv5(x)
-        x = self.relu(x)
+        z = self.conv5(z)
+        z = self.relu(z)
         # 16, 1, 1
-        return x
+        return z
