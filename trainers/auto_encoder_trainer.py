@@ -67,7 +67,7 @@ class AutoencoderTrainer(AbstractTrainer):
             i: None for i in range(10)
         }
         idx = 0
-        while None in nums.values:
+        while None in nums.values():
             img, lbl = ds[idx]
             nums[lbl] = img
             idx += 1
