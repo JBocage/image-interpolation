@@ -6,6 +6,6 @@ setup(
     author='J&M',
     author_email='jnm@gmail.com',
     description='Description of my package',
-    packages=find_packages(exclude=["sandbox", "data", "venv"]),    
+    packages=find_packages(exclude=["sandbox", "data", "venv", "docs"]),    
     install_requires=[],
 )
