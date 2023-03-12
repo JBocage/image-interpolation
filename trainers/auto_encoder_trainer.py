@@ -48,6 +48,14 @@ class AutoencoderTrainer(AbstractTrainer):
             self.save_state()
         
     def save_transfo_fig(self):
+
+        transfo_to_observe = [
+            [0, 8],
+            [5, 7],
+            [5, 2],
+            [6, 9]
+        ]
+
         ds = datasets.MNIST(
             root = PackagePaths.DATA,
             train = True,
@@ -55,29 +63,41 @@ class AutoencoderTrainer(AbstractTrainer):
             transform=lambda x: torch.tensor(np.array(x)/255).float()[None, :]
         )
 
-        input_1, lbl_1 = ds[0]
-        input_2, lbl_2 = ds[1]
-
-        fig, (ax_0, ax_25, ax_50, ax_75, ax_100) = plt.subplots(1, 5)
-
-        with torch.no_grad():
-            enc_1 = self.model.encoder(input_1[None, :])
-            enc_2 = self.model.encoder(input_2[None, :])
-
-            out_0 = self.model.decoder(enc_1)[0,0]
-            out_25 = self.model.decoder(.75*enc_1 + .25*enc_2)[0,0]
-            out_50 = self.model.decoder(.5*enc_1 + .5*enc_2)[0,0]
-            out_75 = self.model.decoder(.25*enc_1 + .75*enc_2)[0,0]
-            out_100 = self.model.decoder(enc_2)[0,0]
+        nums = {
+            i: None for i in range(10)
+        }
+        idx = 0
+        while None in nums.values:
+            img, lbl = ds[idx]
+            nums[lbl] = img
+            idx += 1
         
-        ax_0.imshow(out_0.numpy())
-        ax_25.imshow(out_25.numpy())
-        ax_50.imshow(out_50.numpy())
-        ax_75.imshow(out_75.numpy())
-        ax_100.imshow(out_100.numpy())
+        fig, axes = plt.subplots(len(transfo_to_observe), 5)
+        for (ax_0, ax_25, ax_50, ax_75, ax_100), (lbl1, lbl2) in zip(axes, transfo_to_observe):
 
-        fig.savefig(self.save_dest / ".perf_expl.png")
-        
+            input_1 = nums[lbl1]
+            input_2 = nums[lbl2]
+
+            with torch.no_grad():
+                enc_1 = self.model.encoder(input_1[None, :])
+                enc_2 = self.model.encoder(input_2[None, :])
+
+                out_0 = self.model.decoder(enc_1)[0,0]
+                out_25 = self.model.decoder(.75*enc_1 + .25*enc_2)[0,0]
+                out_50 = self.model.decoder(.5*enc_1 + .5*enc_2)[0,0]
+                out_75 = self.model.decoder(.25*enc_1 + .75*enc_2)[0,0]
+                out_100 = self.model.decoder(enc_2)[0,0]
+            
+            ax_0.imshow(out_0.numpy())
+            ax_0.set_title(str(lbl1))
+            ax_25.imshow(out_25.numpy())
+            ax_50.imshow(out_50.numpy())
+            ax_75.imshow(out_75.numpy())
+            ax_100.imshow(out_100.numpy())
+            ax_100.set_title(str(lbl2))
+
+            fig.savefig(self.save_dest / ".perf_expl.png")
+            
     def save_state(self):
         super().save_state()
         self.save_transfo_fig()
