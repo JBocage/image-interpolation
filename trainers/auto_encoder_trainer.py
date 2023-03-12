@@ -1,6 +1,7 @@
 import pathlib
 from tempfile import TemporaryDirectory
 from typing import List
+import imageio
 
 from PIL import Image
 from models.auto_encoder import AutoEncoder
@@ -50,9 +51,11 @@ class AutoencoderTrainer(AbstractTrainer):
                 self.loss_record.append(loss.item())
             
             print(f"Finished epoch {e} with loss={loss.item(): .5f}")
-            self.save_state(save_gif=(e%3 == 2))
+            self.save_state(save_gif=(e % 3 == 2))
         
     def save_transfo_fig(self):
+
+        plt.ioff()
 
         transfo_to_observe = [
             [0, 8],
@@ -112,8 +115,14 @@ class AutoencoderTrainer(AbstractTrainer):
 
     def save_transfo_gifs(self):
 
+        plt.ioff()
+
         transfo_to_observe = [
+            [0, 3],
             [0, 8],
+            [1, 4],
+            [1, 9],
+            [3, 1],
             [5, 7],
             [5, 2],
             [6, 9]
@@ -142,36 +151,34 @@ class AutoencoderTrainer(AbstractTrainer):
 
             imgs_names = []
 
+            input_1 = nums[source]
+            input_2 = nums[dest]
+
             with torch.no_grad():
                 enc_1 = self.model.encoder(input_1[None, :])
                 enc_2 = self.model.encoder(input_2[None, :])
 
-            for i in range(101):
+            for i in range(0, 101, 2):
 
                 p = i/100
 
                 fig, ax = plt.subplots()
 
-                input_1 = nums[source]
-                input_2 = nums[dest]
                 with torch.no_grad():
                     out = self.model.decoder(p*enc_1 + (1-p)*enc_2)[0,0]
                 
                 ax.imshow(out.numpy())
-                ax.set_title(f'{source} to {dest}')
+                ax.set_title(f'{dest} to {source}: {i}%')
 
                 fname = f"tmp_{i}.png"
                 fig.savefig(path_to_tempdir / fname)
                 imgs_names.append(fname)
                 plt.close(fig)
             
-            imgs: List[Image.Image] = []
+            imgs: List = []
             for fname in imgs_names:
-                imgs.append(Image.open(path_to_tempdir / fname))
+                imgs.append(imageio.imread((path_to_tempdir / fname).as_posix()))
             
-            imgs[0].save(self.save_dest / f'{source}_to_{dest}.gif', format='GIF',
-                append_images=imgs[1:],
-                save_all=True,
-                duration=300, loop=0)
+            imageio.mimsave(self.save_dest / f"{source}_to_{dest}.gif", imgs)
             
             tempdir.cleanup()
