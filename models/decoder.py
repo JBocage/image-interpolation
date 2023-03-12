@@ -16,6 +16,7 @@ class Decoder(AbstractModel):
         self.unpool=nn.UpsamplingNearest2d(scale_factor=(2,2))
 
         self.relu=nn.ReLU()
+        self.sigmoid=nn.Sigmoid()
 
     def forward(self, Z:torch.Tensor):
 
@@ -23,4 +24,4 @@ class Decoder(AbstractModel):
         deconv2=self.unpool(self.relu(self.deconv2(deconv1)))
         deconv3=self.unpool(self.relu(self.deconv3(deconv2)))
 
-        return self.conv1(deconv3)
+        return self.sigmoid(self.conv1(deconv3))
